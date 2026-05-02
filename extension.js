@@ -155,7 +155,7 @@ export default class GOCRExtension extends Extension {
             style_class: 'system-status-icon',
         });
         this._indicator.add_child(icon);
-        this._indicator.connect('button-press-event', () => {
+        this._indicatorPressId = this._indicator.connect('button-press-event', () => {
             this._startCapture();
             return Clutter.EVENT_STOP;
         });
@@ -171,14 +171,20 @@ export default class GOCRExtension extends Extension {
         );
 
         this._overlay = null;
+        this._captureInProgress = false;
     }
 
     disable() {
+        this._captureInProgress = false;
         this._removeOverlay();
 
         Main.wm.removeKeybinding('capture-shortcut');
 
         if (this._indicator) {
+            if (this._indicatorPressId) {
+                this._indicator.disconnect(this._indicatorPressId);
+                this._indicatorPressId = null;
+            }
             this._indicator.destroy();
             this._indicator = null;
         }
@@ -195,21 +201,18 @@ export default class GOCRExtension extends Extension {
             return;
 
         this._overlay = new SelectionOverlay();
-        this._overlay.connect('area-selected', (_o, x, y, w, h) => {
+        this._overlayAreaId = this._overlay.connect('area-selected', (_o, x, y, w, h) => {
             this._captureArea(x, y, w, h).catch(e =>
                 Main.notify(_('GOCR — Error'), String(e))
             );
         });
-        this._overlay.connect('cancelled', () => this._removeOverlay());
+        this._overlayCancelId = this._overlay.connect('cancelled', () => this._removeOverlay());
 
         Main.layoutManager.addTopChrome(this._overlay);
 
         this._modalPushed = Main.pushModal(this._overlay);
         if (!this._modalPushed) {
-            // GNOME couldn't give us the input grab — abort cleanly
-            Main.layoutManager.removeChrome(this._overlay);
-            this._overlay.destroy();
-            this._overlay = null;
+            this._removeOverlay();
             return;
         }
 
@@ -226,25 +229,29 @@ export default class GOCRExtension extends Extension {
     }
 
     _removeOverlay() {
-        // Null out first so re-entrant calls are no-ops
-        const overlay = this._overlay;
-        this._overlay = null;
-
         if (this._stageKeyId) {
             try { global.stage.disconnect(this._stageKeyId); } catch (_) {}
             this._stageKeyId = null;
         }
 
-        // Critical cleanup first — must run even if cursor reset fails
-        if (overlay) {
-            if (this._modalPushed) {
-                try { Main.popModal(overlay); } catch (_) {}
-                this._modalPushed = false;
-            }
-            try { Main.layoutManager.removeChrome(overlay); } catch (_) {}
-            try { overlay.destroy(); } catch (_) {}
-        }
+        if (!this._overlay)
+            return;
 
+        if (this._overlayAreaId) {
+            try { this._overlay.disconnect(this._overlayAreaId); } catch (_) {}
+            this._overlayAreaId = null;
+        }
+        if (this._overlayCancelId) {
+            try { this._overlay.disconnect(this._overlayCancelId); } catch (_) {}
+            this._overlayCancelId = null;
+        }
+        if (this._modalPushed) {
+            try { Main.popModal(this._overlay); } catch (_) {}
+            this._modalPushed = false;
+        }
+        try { Main.layoutManager.removeChrome(this._overlay); } catch (_) {}
+        try { this._overlay.destroy(); } catch (_) {}
+        this._overlay = null;
     }
 
     // -----------------------------------------------------------------------
@@ -266,6 +273,7 @@ export default class GOCRExtension extends Extension {
             const trimmed = text.trim();
 
             if (trimmed) {
+                // Core purpose: write OCR-recognised text to clipboard (write-only, no read)
                 St.Clipboard.get_default().set_text(
                     St.ClipboardType.CLIPBOARD, trimmed
                 );
