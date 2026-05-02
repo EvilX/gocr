@@ -1,0 +1,10 @@
+{
+    "name": "GOCR",
+    "description": "Select a screen area and copy the recognized text to clipboard (requires tesseract-ocr)",
+    "uuid": "gocr@leonid.nasedkin",
+    "shell-version": ["50"],
+    "version": 1,
+    "url": "https://github.com/leonid/gocr",
+    "settings-schema": "org.gnome.shell.extensions.gocr",
+    "gettext-domain": "gocr@leonid.nasedkin"
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.gocr"
+          path="/org/gnome/shell/extensions/gocr/">
+
+    <key name="capture-shortcut" type="as">
+      <default><![CDATA[['<Super><Shift>T']]]></default>
+      <summary>Capture shortcut</summary>
+      <description>Keyboard shortcut to capture screen area for OCR</description>
+    </key>
+
+    <key name="ocr-language" type="s">
+      <default>'rus+eng'</default>
+      <summary>OCR Language</summary>
+      <description>Tesseract language(s), e.g. rus, eng, rus+eng</description>
+    </key>
+
+  </schema>
+</schemalist>
