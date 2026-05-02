@@ -22,7 +22,7 @@ tesseract --list-langs
 ### Installation
 
 ```bash
-git clone https://github.com/leonid/gocr.git
+git clone https://github.com/EvilX/gocr
 cd gocr
 bash install.sh
 ```
@@ -89,7 +89,7 @@ tesseract --list-langs
 ### Установка
 
 ```bash
-git clone https://github.com/leonid/gocr.git
+git clone https://github.com/EvilX/gocr
 cd gocr
 bash install.sh
 ```

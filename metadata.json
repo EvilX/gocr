@@ -4,7 +4,7 @@
     "uuid": "gocr@leonid.nasedkin",
     "shell-version": ["50"],
     "version": 1,
-    "url": "https://github.com/leonid/gocr",
+    "url": "https://github.com/EvilX/gocr",
     "settings-schema": "org.gnome.shell.extensions.gocr",
     "gettext-domain": "gocr@leonid.nasedkin"
 }
