@@ -65,10 +65,6 @@ gocr@leonid.nasedkin/
 
 **Text not recognized** — make sure the required language pack is installed (`tesseract --list-langs`).
 
-**Shell freezes after an error** — this was fixed in the current version. If it still happens, press `Super` to open the Activities view and then close it; this resets the input focus.
-
-**Icon not showing** — try disabling and re-enabling the extension in GNOME Extensions after relogging.
-
 ---
 
 ## Русский
@@ -131,7 +127,3 @@ gocr@leonid.nasedkin/
 ### Решение проблем
 
 **Текст не распознаётся** — убедитесь, что нужный языковой пакет установлен (`tesseract --list-langs`).
-
-**Shell зависает после ошибки** — исправлено в текущей версии. Если всё же происходит — нажмите `Super` для открытия Activities и закройте его; это сбрасывает захват ввода.
-
-**Иконка не отображается** — после повторного входа попробуйте выключить и включить расширение в GNOME Extensions.
