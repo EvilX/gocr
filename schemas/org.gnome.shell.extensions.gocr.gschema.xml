@@ -9,6 +9,12 @@
       <description>Keyboard shortcut to capture screen area for OCR</description>
     </key>
 
+    <key name="screenshot-shortcut" type="as">
+      <default><![CDATA[['<Alt><Shift>t']]]></default>
+      <summary>Screenshot shortcut</summary>
+      <description>Keyboard shortcut to capture screen area and copy as image to clipboard</description>
+    </key>
+
     <key name="ocr-language" type="s">
       <default>'rus+eng'</default>
       <summary>OCR Language</summary>

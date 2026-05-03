@@ -28,6 +28,9 @@ msgstr "tesseract не найден. Установите: sudo dnf install tess
 msgid "tesseract exited with error"
 msgstr "tesseract завершился с ошибкой"
 
+msgid "wl-copy not found. Install: sudo dnf install wl-clipboard"
+msgstr "wl-copy не найден. Установите: sudo dnf install wl-clipboard"
+
 # prefs.js
 msgid "Not set"
 msgstr "Не задано"
@@ -49,6 +52,12 @@ msgstr "Нажмите на строку, затем введите нужную
 
 msgid "Capture Screen Area"
 msgstr "Захват области экрана"
+
+msgid "Copy Screenshot to Clipboard"
+msgstr "Скопировать скриншот в буфер обмена"
+
+msgid "Screenshot copied to clipboard"
+msgstr "Скриншот скопирован в буфер обмена"
 
 msgid "Recognition"
 msgstr "Распознавание"

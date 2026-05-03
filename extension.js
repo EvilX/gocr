@@ -7,6 +7,7 @@ import Gio from 'gi://Gio';
 import Meta from 'gi://Meta';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as MessageTray from 'resource:///org/gnome/shell/ui/messageTray.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
@@ -156,18 +157,25 @@ export default class GOCRExtension extends Extension {
         });
         this._indicator.add_child(icon);
         this._indicatorPressId = this._indicator.connect('button-press-event', () => {
-            this._startCapture();
+            this._startCapture('ocr');
             return Clutter.EVENT_STOP;
         });
         Main.panel.addToStatusArea('gocr', this._indicator);
 
-        // Keyboard shortcut
+        // Keyboard shortcuts
         Main.wm.addKeybinding(
             'capture-shortcut',
             this._settings,
             Meta.KeyBindingFlags.NONE,
             Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
-            () => this._startCapture()
+            () => this._startCapture('ocr')
+        );
+        Main.wm.addKeybinding(
+            'screenshot-shortcut',
+            this._settings,
+            Meta.KeyBindingFlags.NONE,
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+            () => this._startCapture('screenshot')
         );
 
         this._overlay = null;
@@ -179,6 +187,7 @@ export default class GOCRExtension extends Extension {
         this._removeOverlay();
 
         Main.wm.removeKeybinding('capture-shortcut');
+        Main.wm.removeKeybinding('screenshot-shortcut');
 
         if (this._indicator) {
             if (this._indicatorPressId) {
@@ -196,15 +205,16 @@ export default class GOCRExtension extends Extension {
     // Overlay management
     // -----------------------------------------------------------------------
 
-    _startCapture() {
+    _startCapture(action = 'ocr') {
         if (this._overlay || this._captureInProgress)
             return;
 
         this._overlay = new SelectionOverlay();
         this._overlayAreaId = this._overlay.connect('area-selected', (_o, x, y, w, h) => {
-            this._captureArea(x, y, w, h).catch(e =>
-                Main.notify(_('GOCR — Error'), String(e))
-            );
+            const task = action === 'screenshot'
+                ? this._copyScreenshot(x, y, w, h)
+                : this._captureArea(x, y, w, h);
+            task.catch(e => Main.notify(_('GOCR — Error'), String(e)));
         });
         this._overlayCancelId = this._overlay.connect('cancelled', () => this._removeOverlay());
 
@@ -287,6 +297,92 @@ export default class GOCRExtension extends Extension {
                 Gio.File.new_for_path(tmpFile).delete(null);
             } catch (_) { /* already gone */ }
         }
+    }
+
+    async _copyScreenshot(x, y, w, h) {
+        this._removeOverlay();
+        this._captureInProgress = true;
+
+        await this._sleep(150);
+        const tmpFile = `/tmp/gocr_${GLib.get_monotonic_time()}.png`;
+
+        try {
+            await this._screenshotArea(x, y, w, h, tmpFile);
+            await this._wlCopy(tmpFile);
+
+            // Copy to cache so the file outlives the tmp cleanup below
+            const thumbPath = `${GLib.get_user_cache_dir()}/gocr_screenshot.png`;
+            try {
+                Gio.File.new_for_path(tmpFile).copy(
+                    Gio.File.new_for_path(thumbPath),
+                    Gio.FileCopyFlags.OVERWRITE, null, null
+                );
+                this._notifyWithThumb(_('Screenshot copied to clipboard'), thumbPath);
+            } catch (_e) {
+                Main.notify('GOCR', _('Screenshot copied to clipboard'));
+            }
+        } finally {
+            this._captureInProgress = false;
+            try { Gio.File.new_for_path(tmpFile).delete(null); } catch (_) {}
+        }
+    }
+
+    _notifyWithThumb(body, imagePath) {
+        const source = new MessageTray.Source({
+            title: 'GOCR',
+            iconName: 'edit-copy-symbolic',
+        });
+        Main.messageTray.add(source);
+        const notification = new MessageTray.Notification({
+            source,
+            title: 'GOCR',
+            body,
+            gicon: Gio.FileIcon.new(Gio.File.new_for_path(imagePath)),
+        });
+        source.addNotification(notification);
+    }
+
+    // Pipe a PNG file to wl-copy (wl-clipboard). wl-copy stays running in the
+    // background as the Wayland clipboard owner; we resolve as soon as stdin is
+    // closed and the data is handed off.
+    _wlCopy(filename) {
+        return new Promise((resolve, reject) => {
+            let proc;
+            try {
+                proc = Gio.Subprocess.new(
+                    ['wl-copy', '--type', 'image/png'],
+                    Gio.SubprocessFlags.STDIN_PIPE
+                );
+            } catch (_) {
+                reject(new Error(_('wl-copy not found. Install: sudo dnf install wl-clipboard')));
+                return;
+            }
+
+            let inStream;
+            try {
+                inStream = Gio.File.new_for_path(filename).read(null);
+            } catch (e) {
+                reject(e);
+                return;
+            }
+
+            const outStream = proc.get_stdin_pipe();
+            outStream.splice_async(
+                inStream,
+                Gio.OutputStreamSpliceFlags.CLOSE_SOURCE |
+                Gio.OutputStreamSpliceFlags.CLOSE_TARGET,
+                GLib.PRIORITY_DEFAULT,
+                null,
+                (_out, result) => {
+                    try {
+                        _out.splice_finish(result);
+                        resolve();
+                    } catch (e) {
+                        reject(e);
+                    }
+                }
+            );
+        });
     }
 
     // Take a screenshot using Shell.Screenshot (internal class, no D-Bus required).

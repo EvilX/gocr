@@ -138,6 +138,9 @@ export default class GOCRPreferences extends ExtensionPreferences {
         shortcutGroup.add(
             new ShortcutRow(_('Capture Screen Area'), settings, 'capture-shortcut')
         );
+        shortcutGroup.add(
+            new ShortcutRow(_('Copy Screenshot to Clipboard'), settings, 'screenshot-shortcut')
+        );
 
         // --- OCR language -------------------------------------------------
         const ocrGroup = new Adw.PreferencesGroup({title: _('Recognition')});
