@@ -2,6 +2,8 @@
 
 A GNOME Shell extension that lets you select any area of the screen, recognize the text in it with Tesseract OCR, and copy the result to the clipboard. You can also copy the selected area as an image.
 
+[Gnome Extenstions](https://extensions.gnome.org/extension/9821/gocr/)
+
 ---
 
 ## English
