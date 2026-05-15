@@ -15,6 +15,12 @@
       <description>Keyboard shortcut to capture screen area and copy as image to clipboard</description>
     </key>
 
+    <key name="show-indicator" type="b">
+      <default>true</default>
+      <summary>Show panel indicator</summary>
+      <description>Whether to show the GOCR icon in the top panel</description>
+    </key>
+
     <key name="ocr-language" type="s">
       <default>'rus+eng'</default>
       <summary>OCR Language</summary>

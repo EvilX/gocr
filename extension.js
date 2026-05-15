@@ -161,6 +161,11 @@ export default class GOCRExtension extends Extension {
             return Clutter.EVENT_STOP;
         });
         Main.panel.addToStatusArea('gocr', this._indicator);
+        this._indicator.visible = this._settings.get_boolean('show-indicator');
+        this._showIndicatorId = this._settings.connect('changed::show-indicator', () => {
+            if (this._indicator)
+                this._indicator.visible = this._settings.get_boolean('show-indicator');
+        });
 
         // Keyboard shortcuts
         Main.wm.addKeybinding(
@@ -185,6 +190,11 @@ export default class GOCRExtension extends Extension {
     disable() {
         this._captureInProgress = false;
         this._removeOverlay();
+
+        if (this._showIndicatorId) {
+            this._settings.disconnect(this._showIndicatorId);
+            this._showIndicatorId = null;
+        }
 
         Main.wm.removeKeybinding('capture-shortcut');
         Main.wm.removeKeybinding('screenshot-shortcut');

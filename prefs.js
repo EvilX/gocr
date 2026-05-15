@@ -2,6 +2,7 @@ import GObject from 'gi://GObject';
 import Adw from 'gi://Adw';
 import Gtk from 'gi://Gtk';
 import Gdk from 'gi://Gdk';
+import Gio from 'gi://Gio';
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 // Modifier keys that should not be saved as standalone shortcuts
@@ -127,6 +128,16 @@ export default class GOCRPreferences extends ExtensionPreferences {
             icon_name: 'edit-find-symbolic',
         });
         window.add(page);
+
+        // --- Appearance --------------------------------------------------
+        const appearanceGroup = new Adw.PreferencesGroup({title: _('Appearance')});
+        page.add(appearanceGroup);
+
+        const indicatorRow = new Adw.SwitchRow({
+            title: _('Show panel icon'),
+        });
+        settings.bind('show-indicator', indicatorRow, 'active', Gio.SettingsBindFlags.DEFAULT);
+        appearanceGroup.add(indicatorRow);
 
         // --- Keyboard shortcut -------------------------------------------
         const shortcutGroup = new Adw.PreferencesGroup({

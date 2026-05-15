@@ -32,6 +32,12 @@ msgid "wl-copy not found. Install: sudo dnf install wl-clipboard"
 msgstr "wl-copy не найден. Установите: sudo dnf install wl-clipboard"
 
 # prefs.js
+msgid "Appearance"
+msgstr "Внешний вид"
+
+msgid "Show panel icon"
+msgstr "Показывать иконку на панели"
+
 msgid "Not set"
 msgstr "Не задано"
 
