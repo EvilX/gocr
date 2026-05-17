@@ -318,9 +318,22 @@ export default class GOCRExtension extends Extension {
 
         try {
             await this._screenshotArea(x, y, w, h, tmpFile);
-            await this._wlCopy(tmpFile);
 
-            // Copy to cache so the file outlives the tmp cleanup below
+            const [bytes] = await new Promise((resolve, reject) => {
+                Gio.File.new_for_path(tmpFile).load_bytes_async(
+                    null, (file, result) => {
+                        try { resolve(file.load_bytes_finish(result)); }
+                        catch (e) { reject(e); }
+                    }
+                );
+            });
+
+            // Write PNG bytes directly to clipboard — no external tools needed
+            St.Clipboard.get_default().set_content(
+                St.ClipboardType.CLIPBOARD, 'image/png', bytes
+            );
+
+            // Notification with thumbnail
             const thumbPath = `${GLib.get_user_cache_dir()}/gocr_screenshot.png`;
             try {
                 Gio.File.new_for_path(tmpFile).copy(
@@ -350,49 +363,6 @@ export default class GOCRExtension extends Extension {
             gicon: Gio.FileIcon.new(Gio.File.new_for_path(imagePath)),
         });
         source.addNotification(notification);
-    }
-
-    // Pipe a PNG file to wl-copy (wl-clipboard). wl-copy stays running in the
-    // background as the Wayland clipboard owner; we resolve as soon as stdin is
-    // closed and the data is handed off.
-    _wlCopy(filename) {
-        return new Promise((resolve, reject) => {
-            let proc;
-            try {
-                proc = Gio.Subprocess.new(
-                    ['wl-copy', '--type', 'image/png'],
-                    Gio.SubprocessFlags.STDIN_PIPE
-                );
-            } catch (_) {
-                reject(new Error(_('wl-copy not found. Install: sudo dnf install wl-clipboard')));
-                return;
-            }
-
-            let inStream;
-            try {
-                inStream = Gio.File.new_for_path(filename).read(null);
-            } catch (e) {
-                reject(e);
-                return;
-            }
-
-            const outStream = proc.get_stdin_pipe();
-            outStream.splice_async(
-                inStream,
-                Gio.OutputStreamSpliceFlags.CLOSE_SOURCE |
-                Gio.OutputStreamSpliceFlags.CLOSE_TARGET,
-                GLib.PRIORITY_DEFAULT,
-                null,
-                (_out, result) => {
-                    try {
-                        _out.splice_finish(result);
-                        resolve();
-                    } catch (e) {
-                        reject(e);
-                    }
-                }
-            );
-        });
     }
 
     // Take a screenshot using Shell.Screenshot (internal class, no D-Bus required).

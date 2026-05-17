@@ -15,7 +15,6 @@ A GNOME Shell extension that lets you select any area of the screen, recognize t
 | GNOME Shell 45–50 | — | — |
 | `tesseract` | `sudo dnf install tesseract` | `sudo apt install tesseract-ocr` |
 | Russian language pack | `sudo dnf install tesseract-langpack-rus` | `sudo apt install tesseract-ocr-rus` |
-| `wl-clipboard` (for screenshot copy) | `sudo dnf install wl-clipboard` | `sudo apt install wl-clipboard` |
 
 To see all installed languages:
 ```bash
@@ -86,7 +85,6 @@ gocr@leonid.nasedkin/
 | GNOME Shell 45–50 | — | — |
 | `tesseract` | `sudo dnf install tesseract` | `sudo apt install tesseract-ocr` |
 | Пакет русского языка | `sudo dnf install tesseract-langpack-rus` | `sudo apt install tesseract-ocr-rus` |
-| `wl-clipboard` (для копирования скриншота) | `sudo dnf install wl-clipboard` | `sudo apt install wl-clipboard` |
 
 Просмотр установленных языков:
 ```bash

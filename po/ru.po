@@ -28,8 +28,6 @@ msgstr "tesseract не найден. Установите: sudo dnf install tess
 msgid "tesseract exited with error"
 msgstr "tesseract завершился с ошибкой"
 
-msgid "wl-copy not found. Install: sudo dnf install wl-clipboard"
-msgstr "wl-copy не найден. Установите: sudo dnf install wl-clipboard"
 
 # prefs.js
 msgid "Appearance"

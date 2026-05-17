@@ -11,17 +11,17 @@ echo "=== GOCR Extension Installer ==="
 # --- Check dependencies ---
 if ! command -v tesseract &>/dev/null; then
     echo ""
-    echo "  ВНИМАНИЕ: tesseract не установлен."
-    echo "  Установите командой:"
+    echo "  WARNING: tesseract is not installed."
+    echo "  Install it with:"
     echo "    sudo dnf install tesseract tesseract-langpack-rus"
     echo ""
 fi
 
 # --- Check gettext tools ---
 if ! command -v msgfmt &>/dev/null; then
-    echo "  ВНИМАНИЕ: msgfmt не найден (пакет gettext)."
-    echo "  Установите: sudo dnf install gettext"
-    echo "  Переводы не будут скомпилированы."
+    echo "  WARNING: msgfmt not found (package: gettext)."
+    echo "  Install it with: sudo dnf install gettext"
+    echo "  Translations will not be compiled."
 fi
 
 # --- Copy extension files ---
@@ -42,23 +42,23 @@ if command -v msgfmt &>/dev/null; then
         mkdir -p "$mo_dir"
         msgfmt "$po_file" -o "$mo_dir/$UUID.mo"
     done
-    echo "Переводы скомпилированы."
+    echo "Translations compiled."
 fi
 
 # --- Compile GSettings schema ---
 glib-compile-schemas "$SCHEMA_DIR"
-echo "Схема GSettings скомпилирована."
+echo "GSettings schema compiled."
 
 # --- Enable extension ---
 if command -v gnome-extensions &>/dev/null; then
     gnome-extensions enable "$UUID" 2>/dev/null || true
-    echo "Расширение включено (если уже загружено оболочкой)."
+    echo "Extension enabled (if the shell has already loaded it)."
 fi
 
 echo ""
-echo "Готово! Перезапустите GNOME Shell:"
-echo "  • Wayland:  выйдите из сессии и войдите снова"
-echo "  • X11:      нажмите Alt+F2, введите 'r', Enter"
+echo "Done! Restart GNOME Shell to activate the extension:"
+echo "  • Wayland:  log out and log back in"
+echo "  • X11:      press Alt+F2, type 'r', press Enter"
 echo ""
-echo "После перезапуска горячая клавиша: Super+Shift+T"
-echo "Сменить клавишу: Настройки расширений → GOCR → Настройки"
+echo "Default shortcut: Super+Shift+T"
+echo "Change it in: Extensions → GOCR → Preferences"
