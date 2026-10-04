@@ -12,7 +12,7 @@ A GNOME Shell extension that lets you select any area of the screen, recognize t
 
 | Dependency | Install (Fedora) | Install (Ubuntu/Debian) |
 |---|---|---|
-| GNOME Shell 45–50 | — | — |
+| GNOME Shell 45–51 | — | — |
 | `tesseract` | `sudo dnf install tesseract` | `sudo apt install tesseract-ocr` |
 | Russian language pack | `sudo dnf install tesseract-langpack-rus` | `sudo apt install tesseract-ocr-rus` |
 
@@ -82,7 +82,7 @@ gocr@leonid.nasedkin/
 
 | Зависимость | Установка (Fedora) | Установка (Ubuntu/Debian) |
 |---|---|---|
-| GNOME Shell 45–50 | — | — |
+| GNOME Shell 45–51 | — | — |
 | `tesseract` | `sudo dnf install tesseract` | `sudo apt install tesseract-ocr` |
 | Пакет русского языка | `sudo dnf install tesseract-langpack-rus` | `sudo apt install tesseract-ocr-rus` |
 
