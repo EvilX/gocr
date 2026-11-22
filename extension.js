@@ -11,6 +11,26 @@ import * as MessageTray from 'resource:///org/gnome/shell/ui/messageTray.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
+const NOTIFY_MAX_LENGTH = 200;
+
+// Normalizes a drag from (x0, y0) to (x1, y1) into a rounded rectangle.
+// Returns null if the area is too small to be an intentional selection.
+export function selectionRect(x0, y0, x1, y1, minSize = 5) {
+    const x = Math.round(Math.min(x0, x1));
+    const y = Math.round(Math.min(y0, y1));
+    const width = Math.round(Math.abs(x1 - x0));
+    const height = Math.round(Math.abs(y1 - y0));
+
+    if (width < minSize || height < minSize)
+        return null;
+    return {x, y, width, height};
+}
+
+// Shortens recognized text for the notification body.
+export function notificationText(text, maxLength = NOTIFY_MAX_LENGTH) {
+    return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text;
+}
+
 // ---------------------------------------------------------------------------
 // Panel indicator — overrides _onButtonPress so our button-press-event handler
 // is not blocked by PanelMenu.Button's own handler (which returns EVENT_STOP
@@ -42,8 +62,6 @@ const SelectionOverlay = GObject.registerClass({
     },
 }, class SelectionOverlay extends St.Widget {
     _init() {
-        const monitor = Main.layoutManager.primaryMonitor;
-
         super._init({
             reactive: true,
             can_focus: true,
@@ -74,7 +92,7 @@ const SelectionOverlay = GObject.registerClass({
         // Set crosshair cursor on this actor — reverts automatically on destroy
         try {
             this.set_cursor_type(Clutter.CursorType.CROSSHAIR ?? Clutter.CursorType.crosshair);
-        } catch (_) {}
+        } catch (_e) {}
 
         this._startX = 0;
         this._startY = 0;
@@ -120,13 +138,10 @@ const SelectionOverlay = GObject.registerClass({
 
         this._dragging = false;
         const [x, y] = event.get_coords();
-        const x1 = Math.round(Math.min(x, this._startX));
-        const y1 = Math.round(Math.min(y, this._startY));
-        const w  = Math.round(Math.abs(x - this._startX));
-        const h  = Math.round(Math.abs(y - this._startY));
+        const rect = selectionRect(this._startX, this._startY, x, y);
 
-        if (w > 4 && h > 4)
-            this.emit('area-selected', x1, y1, w, h);
+        if (rect)
+            this.emit('area-selected', rect.x, rect.y, rect.width, rect.height);
         else
             this.emit('cancelled');
 
@@ -250,7 +265,7 @@ export default class GOCRExtension extends Extension {
 
     _removeOverlay() {
         if (this._stageKeyId) {
-            try { global.stage.disconnect(this._stageKeyId); } catch (_) {}
+            try { global.stage.disconnect(this._stageKeyId); } catch (_e) {}
             this._stageKeyId = null;
         }
 
@@ -258,19 +273,19 @@ export default class GOCRExtension extends Extension {
             return;
 
         if (this._overlayAreaId) {
-            try { this._overlay.disconnect(this._overlayAreaId); } catch (_) {}
+            try { this._overlay.disconnect(this._overlayAreaId); } catch (_e) {}
             this._overlayAreaId = null;
         }
         if (this._overlayCancelId) {
-            try { this._overlay.disconnect(this._overlayCancelId); } catch (_) {}
+            try { this._overlay.disconnect(this._overlayCancelId); } catch (_e) {}
             this._overlayCancelId = null;
         }
         if (this._modalPushed) {
-            try { Main.popModal(this._overlay); } catch (_) {}
+            try { Main.popModal(this._overlay); } catch (_e) {}
             this._modalPushed = false;
         }
-        try { Main.layoutManager.removeChrome(this._overlay); } catch (_) {}
-        try { this._overlay.destroy(); } catch (_) {}
+        try { Main.layoutManager.removeChrome(this._overlay); } catch (_e) {}
+        try { this._overlay.destroy(); } catch (_e) {}
         this._overlay = null;
     }
 
@@ -297,7 +312,7 @@ export default class GOCRExtension extends Extension {
                 St.Clipboard.get_default().set_text(
                     St.ClipboardType.CLIPBOARD, trimmed
                 );
-                Main.notify('GOCR', trimmed.length > 200 ? trimmed.slice(0, 200) + '…' : trimmed);
+                Main.notify('GOCR', notificationText(trimmed));
             } else {
                 Main.notify('GOCR', _('Text not detected'));
             }
@@ -305,7 +320,7 @@ export default class GOCRExtension extends Extension {
             this._captureInProgress = false;
             try {
                 Gio.File.new_for_path(tmpFile).delete(null);
-            } catch (_) { /* already gone */ }
+            } catch (_e) { /* already gone */ }
         }
     }
 
@@ -346,7 +361,7 @@ export default class GOCRExtension extends Extension {
             }
         } finally {
             this._captureInProgress = false;
-            try { Gio.File.new_for_path(tmpFile).delete(null); } catch (_) {}
+            try { Gio.File.new_for_path(tmpFile).delete(null); } catch (_e) {}
         }
     }
 
@@ -377,7 +392,7 @@ export default class GOCRExtension extends Extension {
                 shot.screenshot_area(x, y, w, h, stream, (_obj, result) => {
                     try {
                         const ret = shot.screenshot_area_finish(result);
-                        try { stream.close(null); } catch (_) {}
+                        try { stream.close(null); } catch (_e) {}
                         // finish returns [ok] or [ok, area] depending on version
                         const ok = Array.isArray(ret) ? ret[0] : !!ret;
                         if (ok)
@@ -385,7 +400,7 @@ export default class GOCRExtension extends Extension {
                         else
                             reject(new Error(_('Screenshot failed')));
                     } catch (e) {
-                        try { stream.close(null); } catch (_) {}
+                        try { stream.close(null); } catch (_e) {}
                         reject(e);
                     }
                 });
@@ -406,7 +421,7 @@ export default class GOCRExtension extends Extension {
                     Gio.SubprocessFlags.STDOUT_PIPE |
                     Gio.SubprocessFlags.STDERR_PIPE
                 );
-            } catch (_) {
+            } catch (_e) {
                 reject(new Error(_('tesseract not found. Install: sudo dnf install tesseract')));
                 return;
             }

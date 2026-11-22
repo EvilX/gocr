@@ -1,145 +1,136 @@
 # GOCR — Screen OCR for GNOME
 
-A GNOME Shell extension that lets you select any area of the screen, recognize the text in it with Tesseract OCR, and copy the result to the clipboard. You can also copy the selected area as an image.
+**GNOME Shell extension** that lets you select any area of the screen, recognize the text in it with [Tesseract OCR](https://github.com/tesseract-ocr/tesseract), and copy the result to the clipboard. You can also copy the selected area as an image.
 
-[Gnome Extenstions](https://extensions.gnome.org/extension/9821/gocr/)
+[Latest release](https://github.com/EvilX/gocr/releases/latest) · [GNOME Extensions](https://extensions.gnome.org/extension/9821/gocr/) · [Русская версия](README.ru.md)
 
----
+## Features
 
-## English
+- **OCR**: drag a rectangle over the screen, the recognized text goes to the clipboard and is shown in a notification
+- **Screenshot**: copy the selected area to the clipboard as a PNG image (notification with a thumbnail)
+- Configurable keyboard shortcuts and Tesseract language(s), e.g. `rus+eng`
+- Optional Top Bar icon that starts OCR on click
+- No external clipboard tools: works on Wayland and X11 out of the box
 
-### Requirements
+## Requirements
 
-| Dependency | Install (Fedora) | Install (Ubuntu/Debian) |
+| Dependency | Fedora | Ubuntu/Debian |
 |---|---|---|
-| GNOME Shell 45–51 | — | — |
+| GNOME Shell 50–51 | — | — |
 | `tesseract` | `sudo dnf install tesseract` | `sudo apt install tesseract-ocr` |
-| Russian language pack | `sudo dnf install tesseract-langpack-rus` | `sudo apt install tesseract-ocr-rus` |
+| Language data, e.g. Russian | `sudo dnf install tesseract-langpack-rus` | `sudo apt install tesseract-ocr-rus` |
 
-To see all installed languages:
+List installed languages:
+
 ```bash
 tesseract --list-langs
 ```
 
-### Installation
+## Installation
+
+Install from [extensions.gnome.org](https://extensions.gnome.org/extension/9821/gocr/), from the [latest release](https://github.com/EvilX/gocr/releases/latest/download/gocr@leonid.nasedkin.shell-extension.zip):
 
 ```bash
-git clone https://github.com/EvilX/gocr
-cd gocr
-bash install.sh
+curl -LO https://github.com/EvilX/gocr/releases/latest/download/gocr@leonid.nasedkin.shell-extension.zip
+gnome-extensions install --force gocr@leonid.nasedkin.shell-extension.zip
+gnome-extensions enable gocr@leonid.nasedkin
 ```
 
-Then **log out and log back in** (required on Wayland to reload GNOME Shell).
+or from source:
 
-### Usage
+```bash
+git clone https://github.com/EvilX/gocr.git
+cd gocr
+./install.sh
+```
+
+After installing or updating, log out and log back in so GNOME Shell loads the new code.
+
+## Usage
 
 | Action | Default shortcut | Result |
 |---|---|---|
-| OCR — recognize text | **Super + Shift + T** or panel icon click | Recognized text copied to clipboard |
-| Screenshot — copy as image | **Alt + Shift + T** | Screenshot copied to clipboard (paste in GIMP, Telegram, etc.) |
+| OCR — recognize text | **Super + Shift + T** or click the Top Bar icon | Recognized text copied to clipboard |
+| Screenshot — copy as image | **Alt + Shift + T** | Image copied to clipboard (paste into GIMP, Telegram, etc.) |
 | Cancel selection | **Escape** | — |
 
-Click and drag to draw a rectangle over any area of the screen. After you release the mouse button, the extension processes the selected area and shows a notification with the result.
+Click and drag to draw a rectangle over any area of the screen. After you release the mouse button, the extension processes the area and shows a notification with the result.
 
-### Settings
+## Settings
 
-Open **GNOME Extensions** → **GOCR** → **Preferences** to:
-
-- **Capture Screen Area** — shortcut that captures, runs OCR, and copies the recognized text.
-- **Copy Screenshot to Clipboard** — shortcut that copies the selected area as a PNG image.
-- **OCR Language** — enter a Tesseract language code (e.g. `eng`, `rus`, `rus+eng`).
-
-Click a shortcut row, press the desired key combination, then release. Press Escape to cancel.
-
-### Project structure
-
-```
-gocr@leonid.nasedkin/
-├── extension.js      — main logic (overlay, screenshot, OCR, clipboard)
-├── prefs.js          — preferences window
-├── stylesheet.css    — overlay and selection styles
-├── metadata.json     — extension metadata
-├── icons/
-│   └── gocr.svg            — panel icon
-├── schemas/
-│   └── org.gnome.shell.extensions.gocr.gschema.xml
-├── po/
-│   └── ru.po               — Russian translation
-└── publish.sh        — bundle script for extensions.gnome.org
-```
-
-### Troubleshooting
-
-**Text not recognized** — make sure the required language pack is installed (`tesseract --list-langs`).
-
-**Screenshot not pasting** — some apps (e.g. browsers) only accept images from files, not the internal clipboard. Use GIMP, Telegram, or any app that supports Ctrl+V image paste.
-
----
-
-## Русский
-
-### Требования
-
-| Зависимость | Установка (Fedora) | Установка (Ubuntu/Debian) |
-|---|---|---|
-| GNOME Shell 45–51 | — | — |
-| `tesseract` | `sudo dnf install tesseract` | `sudo apt install tesseract-ocr` |
-| Пакет русского языка | `sudo dnf install tesseract-langpack-rus` | `sudo apt install tesseract-ocr-rus` |
-
-Просмотр установленных языков:
-```bash
-tesseract --list-langs
-```
-
-### Установка
+Open the preferences window via the **Extensions** app or:
 
 ```bash
-git clone https://github.com/EvilX/gocr
-cd gocr
-bash install.sh
+gnome-extensions prefs gocr@leonid.nasedkin
 ```
 
-После этого **выйдите из сессии и войдите снова** — на Wayland GNOME Shell не перезапускается иначе.
-
-### Использование
-
-| Действие | Комбинация по умолчанию | Результат |
+| Setting | Description | Default |
 |---|---|---|
-| OCR — распознать текст | **Super + Shift + T** или клик по иконке на панели | Распознанный текст скопирован в буфер обмена |
-| Скриншот — скопировать как изображение | **Alt + Shift + T** | Скриншот скопирован в буфер обмена (вставить в GIMP, Telegram и т.д.) |
-| Отмена выделения | **Escape** | — |
+| Show panel icon | Show the GOCR icon in the Top Bar | On |
+| Capture Screen Area | Shortcut: select an area, run OCR, copy the text | Super+Shift+T |
+| Copy Screenshot to Clipboard | Shortcut: select an area, copy it as an image | Alt+Shift+T |
+| OCR Language | Tesseract language code(s), e.g. `eng`, `rus`, `rus+eng` | `rus+eng` |
 
-Нажмите и перетащите мышь, чтобы выделить область экрана. После отпускания кнопки расширение обработает область и покажет уведомление с результатом.
+To change a shortcut, click its row, press the key combination and release it. Escape cancels, the clear button removes the shortcut.
 
-### Настройки
+## Troubleshooting
 
-Откройте **Расширения GNOME** → **GOCR** → **Настройки**:
+**Text not recognized** — make sure the language data is installed (`tesseract --list-langs`) and listed in **OCR Language**.
 
-- **Захват области экрана** — комбинация для распознавания текста (OCR) и копирования результата.
-- **Скопировать скриншот в буфер обмена** — комбинация для копирования выделенной области как изображения.
-- **Язык OCR** — код языка Tesseract (например `rus`, `eng`, `rus+eng`).
+**Screenshot does not paste** — some apps (e.g. browsers) accept images only as files, not from the clipboard. Use GIMP, Telegram or another app that supports pasting images with Ctrl+V.
 
-Нажмите на строку комбинации, введите нужную комбинацию клавиш, отпустите. Escape — отмена.
+**Logs** — `journalctl -f -o cat /usr/bin/gnome-shell`
 
-### Структура проекта
+## Building a release archive
 
-```
-gocr@leonid.nasedkin/
-├── extension.js      — основная логика (оверлей, скриншот, OCR, буфер обмена)
-├── prefs.js          — окно настроек
-├── stylesheet.css    — стили оверлея и выделения
-├── metadata.json     — метаданные расширения
-├── icons/
-│   └── gocr.svg            — иконка на панели
-├── schemas/
-│   └── org.gnome.shell.extensions.gocr.gschema.xml
-├── po/
-│   └── ru.po               — русский перевод
-└── publish.sh        — скрипт сборки для extensions.gnome.org
+```bash
+./build.sh
 ```
 
-### Решение проблем
+This produces `dist/gocr@leonid.nasedkin.shell-extension.zip` ready for upload to extensions.gnome.org (requires `glib-compile-schemas`, `msgfmt` and `zip`).
 
-**Текст не распознаётся** — убедитесь, что нужный языковой пакет установлен (`tesseract --list-langs`).
+## Development
 
-**Скриншот не вставляется** — некоторые приложения (например, браузеры) принимают изображения только из файлов, а не из внутреннего буфера обмена. Используйте GIMP, Telegram или любое приложение, поддерживающее вставку изображений через Ctrl+V.
+```bash
+npm install
+npm run lint
+npm test
+```
+
+GitHub Actions runs lint and tests on every push and pull request, then builds the archive (available as a workflow artifact).
+
+To publish a release, bump `version` in `metadata.json`, commit, and push a matching tag:
+
+```bash
+git tag v5 && git push origin v5
+```
+
+The workflow checks that the tag matches `metadata.json` and creates a GitHub release with the archive attached.
+
+## Adding a new translation
+
+1. Copy `po/ru.po` to `po/<lang>.po` (e.g. `po/de.po`)
+2. Translate the `msgstr` values
+3. Run `./install.sh`: the new `.mo` file is compiled automatically
+
+`npm test` checks that every translatable string in `extension.js` and `prefs.js` is translated in each `.po` file.
+
+## Project structure
+
+```
+├── extension.js       Main logic (selection overlay, screenshot, OCR, clipboard)
+├── prefs.js           Preferences UI (libadwaita)
+├── stylesheet.css     Overlay and selection styles
+├── metadata.json      Extension metadata
+├── icons/gocr.svg     Top Bar icon
+├── schemas/           GSettings schema
+├── po/                Translation sources (.po)
+├── install.sh         Install into ~/.local/share/gnome-shell/extensions
+├── build.sh           Release archive build script
+├── tests/             Unit tests (node:test)
+└── .github/workflows/ CI: lint, tests, archive build, GitHub releases
+```
+
+## License
+
+GPL-3.0-or-later

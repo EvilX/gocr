@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Lint & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+
+  build:
+    name: Build archive
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gettext libglib2.0-bin zip
+
+      - name: Build
+        id: build
+        run: echo "zip=$(./build.sh dist)" >> "$GITHUB_OUTPUT"
+
+      - name: Check archive contents
+        run: unzip -l "${{ steps.build.outputs.zip }}"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: shell-extension
+          path: dist/*.zip
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check tag matches metadata version
+        run: |
+          version=$(jq -r .version metadata.json)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match metadata.json version $version"
+            exit 1
+          fi
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: shell-extension
+          path: dist
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/*.zip \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            --verify-tag
