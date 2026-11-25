@@ -13,6 +13,7 @@ GOCR is a GNOME Shell extension (UUID `gocr@leonid.nasedkin`, GNOME Shell 50–5
 | `schemas/org.gnome.shell.extensions.gocr.gschema.xml` | Settings: `capture-shortcut`, `screenshot-shortcut`, `show-indicator`, `ocr-language` |
 | `po/ru.po`, `po/POTFILES` | Russian translation and the list of translatable sources |
 | `stylesheet.css`, `icons/gocr.svg` | Overlay styles and Top Bar icon |
+| `docs/icon.svg` | Project logo for the READMEs (not shipped with the extension) |
 | `install.sh` | Installs into `~/.local/share/gnome-shell/extensions/` |
 | `build.sh` | Builds `dist/<uuid>.shell-extension.zip` |
 | `tests/` | `node:test` unit tests; `stubs.mjs` fakes `gi://` and `resource://` imports |

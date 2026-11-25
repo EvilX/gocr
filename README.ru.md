@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/icon.svg" width="96" height="96" alt="GOCR"></p>
+
 # GOCR — распознавание текста с экрана для GNOME
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/EvilX)
