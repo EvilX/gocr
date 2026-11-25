@@ -1,5 +1,7 @@
 # GOCR — распознавание текста с экрана для GNOME
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/EvilX)
+
 **Расширение для GNOME Shell**: выделите любую область экрана, текст в ней распознаётся с помощью [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) и копируется в буфер обмена. Выделенную область также можно скопировать как изображение.
 
 [Последний релиз](https://github.com/EvilX/gocr/releases/latest) · [GNOME Extensions](https://extensions.gnome.org/extension/9821/gocr/) · [English version](README.md)
